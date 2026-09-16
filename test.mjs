@@ -167,3 +167,92 @@ test("metadata failure does not sink the report", async () => {
   assert.match(report.metadata.error, /info exploded/);
   assert.equal(report.asset.symbol, "NVDA");
 });
+
+// --- HTTP client retry behaviour ------------------------------------------
+// Plan limits must fail on the first response; only transient faults retry.
+
+import { createClient, CmcError } from "./lib/cmc.mjs";
+
+function fakeFetch(responses) {
+  const calls = [];
+  const fetchImpl = async (url) => {
+    calls.push(String(url));
+    const next = responses[Math.min(calls.length - 1, responses.length - 1)];
+    return {
+      ok: next.http < 400,
+      status: next.http,
+      json: async () => ({
+        data: next.data ?? null,
+        status: { error_code: next.code, error_message: next.message ?? "", credit_count: 1, timestamp: "t" },
+      }),
+    };
+  };
+  return { fetchImpl, calls };
+}
+
+for (const [code, expected] of [
+  ["1008", /60 seconds/],
+  ["1009", /00:00 UTC/],
+  ["1010", /renewal date/],
+]) {
+  test(`plan limit ${code} fails on the first response`, async () => {
+    const { fetchImpl, calls } = fakeFetch([{ http: 429, code }]);
+    const client = createClient({ apiKey: "test", fetchImpl });
+    await assert.rejects(() => client.map({ symbol: "NVDA" }), (err) => {
+      assert.ok(err instanceof CmcError);
+      assert.equal(err.code, code);
+      assert.match(err.message, expected);
+      return true;
+    });
+    assert.equal(calls.length, 1, "must not burn retries on a plan limit");
+  });
+}
+
+test("a plan that lacks the endpoint says so, without retrying", async () => {
+  const { fetchImpl, calls } = fakeFetch([{ http: 403, code: "1006" }]);
+  const client = createClient({ apiKey: "test", fetchImpl });
+  await assert.rejects(() => client.quotes({ rwa_id: 1 }), /Basic or higher/);
+  assert.equal(calls.length, 1);
+});
+
+test("an IP rate limit retries and can succeed", async () => {
+  const { fetchImpl, calls } = fakeFetch([
+    { http: 429, code: "1011" },
+    { http: 200, code: "0", data: { rwa_assets: [] } },
+  ]);
+  const client = createClient({ apiKey: "test", fetchImpl });
+  const body = await client.map({ symbol: "NVDA" });
+  assert.deepEqual(body.data, { rwa_assets: [] });
+  assert.equal(calls.length, 2);
+  assert.equal(client.evidence.length, 2, "both attempts are recorded as evidence");
+  assert.equal(client.evidence[0].attempt, 1);
+  assert.equal(client.evidence[1].attempt, 2);
+});
+
+test("a 500 retries, a 400 does not", async () => {
+  const good = fakeFetch([{ http: 500, code: "500" }, { http: 200, code: "0" }]);
+  await createClient({ apiKey: "test", fetchImpl: good.fetchImpl }).map({});
+  assert.equal(good.calls.length, 2);
+
+  const bad = fakeFetch([{ http: 400, code: "1000", message: "bad request" }]);
+  await assert.rejects(
+    () => createClient({ apiKey: "test", fetchImpl: bad.fetchImpl }).map({}),
+    /bad request/,
+  );
+  assert.equal(bad.calls.length, 1);
+});
+
+test("the API key never reaches the evidence log", async () => {
+  const { fetchImpl } = fakeFetch([{ http: 200, code: "0" }]);
+  const client = createClient({ apiKey: "super-secret-key", fetchImpl });
+  await client.map({ symbol: "NVDA" });
+  assert.equal(JSON.stringify(client.evidence).includes("super-secret-key"), false);
+});
+
+test("no key is a clear failure, not a network call", () => {
+  assert.throws(() => createClient({ apiKey: null }), (err) => {
+    assert.equal(err.code, "NO_KEY");
+    assert.match(err.message, /free Basic plan/);
+    return true;
+  });
+});

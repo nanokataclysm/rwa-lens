@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RWA Lens</title>
+    <meta
+      name="description"
+      content="Trace a tokenized real-world asset from the underlying company to its issuers, tokens, and market data, using CoinMarketCap's RWA API."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="wordmark">
+        <span class="wordmark-name">RWA Lens</span>
+        <span class="wordmark-note">Tokenized asset parity, traced to source</span>
+      </div>
+      <form class="search" id="search-form" autocomplete="off">
+        <label class="search-label" for="query">Asset</label>
+        <input
+          id="query"
+          name="q"
+          type="text"
+          value="NVDA"
+          placeholder="NVDA"
+          spellcheck="false"
+          aria-describedby="search-hint"
+        />
+        <button type="submit" id="submit">Investigate</button>
+      </form>
+      <p class="hint" id="search-hint">
+        Ticker, slug, or numeric rwa_id. Try NVDA, gold, or nvidia.
+      </p>
+    </header>
+
+    <main id="stage" aria-live="polite">
+      <section class="intro">
+        <h1>What are you actually buying?</h1>
+        <p>
+          A tokenized share is a claim issued by somebody, traded somewhere, at a
+          price that need not match its siblings. Search an asset to see its
+          issuers, every token that represents it, and how far those tokens sit
+          from each other.
+        </p>
+        <p class="intro-source">
+          Every figure below is returned by the CoinMarketCap Real World Assets
+          API and recomputed here. Nothing is inferred.
+        </p>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <span>Data: CoinMarketCap RWA API (/v5/real-world-assets)</span>
+      <span id="credit-note"></span>
+    </footer>
+
+    <template id="report-template">
+      <article class="report">
+        <div class="asset-head">
+          <img class="asset-logo" alt="" hidden />
+          <div>
+            <h1 class="asset-name"></h1>
+            <p class="asset-desc"></p>
+          </div>
+        </div>
+
+        <dl class="facts" data-region="identity"></dl>
+
+        <section class="block" data-region="market">
+          <h2>Tokenized market</h2>
+          <dl class="facts" data-region="market-facts"></dl>
+          <p class="gap" data-region="market-gap"></p>
+        </section>
+
+        <section class="block" data-region="parity">
+          <h2>Where the tokens disagree</h2>
+          <p class="block-note" data-region="parity-note"></p>
+          <div class="axis" data-region="axis"></div>
+        </section>
+
+        <section class="block" data-region="issuers">
+          <h2>Issuers</h2>
+          <div class="issuer-grid" data-region="issuer-grid"></div>
+        </section>
+
+        <section class="block" data-region="tokens">
+          <h2>Token representations</h2>
+          <div class="table-scroll">
+            <table class="tokens">
+              <thead>
+                <tr>
+                  <th scope="col">Token</th>
+                  <th scope="col">Issuer</th>
+                  <th scope="col" class="num">Price</th>
+                  <th scope="col" class="num">vs aggregate</th>
+                  <th scope="col" class="num">24h volume</th>
+                  <th scope="col" class="num">Market cap</th>
+                </tr>
+              </thead>
+              <tbody data-region="token-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="block" data-region="venues">
+          <h2>Where it trades</h2>
+          <ul class="venues" data-region="venue-list"></ul>
+        </section>
+
+        <section class="block">
+          <h2>Evidence</h2>
+          <p class="block-note">
+            Every CoinMarketCap call behind this report, in order.
+          </p>
+          <div data-region="evidence"></div>
+        </section>
+      </article>
+    </template>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

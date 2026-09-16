@@ -1,0 +1,112 @@
+{
+  "_note": "SYNTHETIC test data, not a CoinMarketCap response. Hand-built to the documented /v5/real-world-assets schema with round numbers so the expected parity maths can be checked by hand. Never present these figures as real market data.",
+  "map": {
+    "data": {
+      "rwa_assets": [
+        { "rwa_id": 42, "name": "Fixture Semiconductors", "symbol": "NVDA", "slug": "fixture-semis", "rwa_rank": 3 },
+        { "rwa_id": 99, "name": "Lower Ranked Namesake", "symbol": "NVDA", "slug": "namesake", "rwa_rank": 87 }
+      ]
+    },
+    "status": { "error_code": "0", "credit_count": 0, "elapsed": 1 }
+  },
+  "quotes": {
+    "data": {
+      "rwa_assets": [
+        {
+          "rwa_id": 42,
+          "name": "Fixture Semiconductors",
+          "symbol": "NVDA",
+          "slug": "fixture-semis",
+          "asset_type": "stock",
+          "rwa_rank": 3,
+          "has_tokens": true,
+          "average_tokenized_price": 100,
+          "tokenized_market_cap": 20000,
+          "tokenized_volume_24h": 5000,
+          "last_updated": "2026-09-16T12:00:00.000Z",
+          "tokens": [
+            {
+              "crypto_id": 1001,
+              "symbol": "FIXa",
+              "name": "Fixture Token A",
+              "issuer_id": "aaaaaaaaaaaaaaaaaaaaaaaa",
+              "issuer_name": "Issuer Alpha",
+              "price": 101,
+              "market_cap": 8000,
+              "volume_24h": 1000
+            },
+            {
+              "crypto_id": 1002,
+              "symbol": "FIXb",
+              "name": "Fixture Token B",
+              "issuer_id": "bbbbbbbbbbbbbbbbbbbbbbbb",
+              "issuer_name": "Issuer Beta",
+              "price": 98,
+              "market_cap": 12000,
+              "volume_24h": 3000
+            },
+            {
+              "crypto_id": 1003,
+              "symbol": "FIXc",
+              "name": "Fixture Token C",
+              "issuer_id": null,
+              "issuer_name": null,
+              "price": null,
+              "market_cap": null,
+              "volume_24h": null
+            }
+          ],
+          "tradfi_markets": [
+            {
+              "exchange": { "exchange_id": 270, "name": "Fixture Exchange", "slug": "fixture-exchange" },
+              "ticker": "FIXa/USDT",
+              "market_url": "https://example.invalid/market"
+            }
+          ]
+        }
+      ]
+    },
+    "status": { "error_code": "0", "credit_count": 1, "elapsed": 4 }
+  },
+  "info": {
+    "data": {
+      "rwa_assets": [
+        {
+          "rwa_id": 42,
+          "name": "Fixture Semiconductors",
+          "symbol": "NVDA",
+          "slug": "fixture-semis",
+          "asset_type": "stock",
+          "rwa_rank": 3,
+          "has_tokens": true,
+          "website": "https://example.invalid",
+          "primary_exchange": "Nasdaq",
+          "industry": "Semiconductors",
+          "founded": "1993-04-05",
+          "employees": 36000,
+          "cik": "0001045810",
+          "about": { "description": "Synthetic fixture company.", "logo": "https://example.invalid/logo.png" }
+        }
+      ]
+    },
+    "status": { "error_code": "0", "credit_count": 1, "elapsed": 3 }
+  },
+  "issuerAlpha": {
+    "data": {
+      "name": "Issuer Alpha",
+      "website": "https://alpha.invalid",
+      "logo": "https://alpha.invalid/logo.png",
+      "tokens": [{ "symbol": "FIXa" }, { "symbol": "OTHER" }]
+    },
+    "status": { "error_code": "0", "credit_count": 1, "elapsed": 2 }
+  },
+  "issuerBeta": {
+    "data": {
+      "name": "Issuer Beta",
+      "website": null,
+      "logo": null,
+      "tokens": [{ "symbol": "FIXb" }]
+    },
+    "status": { "error_code": "0", "credit_count": 1, "elapsed": 2 }
+  }
+}

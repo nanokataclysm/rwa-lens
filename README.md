@@ -14,6 +14,8 @@ return something rather than filling the gap.
 
 ## Run it
 
+Requires Node.js 20 or newer. There are no packages to install or build step.
+
 ```bash
 cp .env.example .env     # then paste your key into CMC_API_KEY
 npm start                # http://localhost:8787
@@ -21,8 +23,16 @@ node cli.mjs NVDA        # same report in the terminal
 node cli.mjs NVDA --json # the structured result
 ```
 
-A free CoinMarketCap **Basic** key covers all seven RWA endpoints. The keyless
-public API does not: `/v5/real-world-assets/*` returns error 1005 without a key.
+Set `CMC_API_KEY` in the environment or a local `.env` file. Live reports require
+a key with access to the requested CoinMarketCap RWA endpoints and available
+credits. The client reports missing keys, plan restrictions, and exhausted
+limits explicitly; it does not fall back to a keyless API. Keep `.env` and API
+keys out of version control.
+
+The web server defaults to port 8787; set `PORT` to change it. Its current
+listener uses all available interfaces and has no authentication, so use it only
+in a trusted local environment. Requests to `/api/investigate?q=NVDA` consume
+the configured key's API credits.
 
 ## What a report contains
 
@@ -59,12 +69,16 @@ What it does compute, deterministically, from CMC's own figures:
 npm test
 ```
 
-Twelve tests cover the deterministic layer against `fixtures/synthetic-nvda.json`,
+The deterministic tests use `fixtures/synthetic-nvda.json`,
 a hand-built fixture with round numbers so every expected figure can be checked
 on paper: deviation, spread, volume-weighted price, volume and market-cap shares,
 freshness, ticker-versus-slug resolution, and graceful degradation when an issuer
 or metadata lookup fails. The fixture is synthetic and labelled as such; it proves
 the maths, not CMC's live response shape.
+
+Additional tests inject mock HTTP responses to check retry limits, plan-access
+errors, missing keys, and key exclusion from the request evidence log. The suite
+runs without provider credentials or live API requests.
 
 ## Design
 
@@ -78,5 +92,10 @@ No dependencies, no build step, no database. `lib/parity.mjs` never sees an LLM
 and an LLM never sees a calculation: identifier resolution, arithmetic and
 comparison all happen in application code.
 
-Credit use is bounded: `/map` is free, issuer lookups are capped at five per
-report, and the footer shows the credits each report spent.
+Issuer lookups are capped at five per report, and the footer shows the credit
+use reported by the API for each report.
+
+Plan limits and key/access errors stop immediately. Transient network errors,
+selected server errors, and IP-level rate limits receive at most four attempts
+with backoff. The evidence log records each received API response, including
+retries, and sums its reported credit use.

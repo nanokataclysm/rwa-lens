@@ -1,7 +1,7 @@
 {
   "name": "rwa-lens",
   "version": "0.1.0",
-  "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Evidence-first research tool for tokenized real-world assets, built on the CoinMarketCap RWA API.",
   "scripts": {

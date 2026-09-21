@@ -14,7 +14,7 @@ return something rather than filling the gap.
 
 ## Run it
 
-Requires Node.js 20 or newer. There are no packages to install or build step.
+Requires Node.js 24 LTS (24.21.0 or newer within 24.x); `.nvmrc` records the validated version. There are no packages to install or build step.
 
 ```bash
 cp .env.example .env     # then paste your key into CMC_API_KEY

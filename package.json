@@ -9,5 +9,5 @@
     "report": "node cli.mjs",
     "test": "node --test test.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=24.21.0 <25" }
 }
